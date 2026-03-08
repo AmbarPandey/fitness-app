@@ -6,3 +6,7 @@ html, body, #root {
   height: 100%;
   background-color: black;
 }
+
+body {
+  background: radial-gradient(circle at top, #0f172a, #020617);
+}

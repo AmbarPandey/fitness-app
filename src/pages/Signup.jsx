@@ -1,86 +1,130 @@
-import { useState, useContext } from "react";
-import UserContext from "../context/UserContext";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
-function Signup() {
+import { createUserWithEmailAndPassword } from "firebase/auth"
+import { doc, setDoc } from "firebase/firestore"
 
-  const { setUser } = useContext(UserContext);
-  const navigate = useNavigate();
+import { auth, db } from "../firebase"
 
-  const [username, setUsername] = useState("");
-  const [height, setHeight] = useState("");
-  const [weight, setWeight] = useState("");
-  const [level, setLevel] = useState("Beginner");
+export default function Signup() {
 
-  function handleSignup() {
+  const navigate = useNavigate()
 
-    const userData = {
-      username,
-      height,
-      weight,
-      level
-    };
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [username, setUsername] = useState("")
+  const [height, setHeight] = useState("")
+  const [weight, setWeight] = useState("")
 
-    setUser(userData);
+  const handleSignup = async (e) => {
 
-    // navigate to home page
-    navigate("/home");
+    e.preventDefault()
+
+    try {
+
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      )
+
+      const user = userCredential.user
+
+      const bmi = (weight / ((height / 100) * (height / 100))).toFixed(1)
+
+      let category = ""
+
+      if (bmi < 18.5) category = "Underweight"
+      else if (bmi < 25) category = "Normal"
+      else if (bmi < 30) category = "Overweight"
+      else category = "Obese"
+
+      await setDoc(doc(db, "users", user.uid), {
+        email,
+        username,
+        height,
+        weight,
+        bmi,
+        category,
+        streak: 0,
+        totalWorkouts: 0
+      })
+
+      alert("Account created successfully!")
+
+      navigate("/home")
+
+    } catch (error) {
+
+      alert(error.message)
+
+    }
   }
 
   return (
-    <div className="h-screen flex items-center justify-center bg-black text-white">
+    <div className="flex justify-center items-center min-h-screen bg-black text-white">
 
-      <div className="bg-slate-900 p-8 rounded-xl w-96">
+      <form
+        onSubmit={handleSignup}
+        className="bg-slate-900 p-8 rounded-xl w-80 space-y-4"
+      >
 
-        <h1 className="text-3xl font-bold mb-6 text-center">
-          Create Your Fitness Profile
-        </h1>
+        <h2 className="text-2xl text-center font-bold">Signup</h2>
 
         <input
           type="text"
           placeholder="Username"
-          className="w-full p-3 mb-4 rounded text-black"
+          className="w-full p-2 bg-slate-800 rounded"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          required
         />
 
         <input
           type="number"
           placeholder="Height (cm)"
-          className="w-full p-3 mb-4 rounded text-black"
+          className="w-full p-2 bg-slate-800 rounded"
           value={height}
           onChange={(e) => setHeight(e.target.value)}
+          required
         />
 
         <input
           type="number"
           placeholder="Weight (kg)"
-          className="w-full p-3 mb-4 rounded text-black"
+          className="w-full p-2 bg-slate-800 rounded"
           value={weight}
           onChange={(e) => setWeight(e.target.value)}
+          required
         />
 
-        <select
-          className="w-full p-3 mb-6 rounded text-black"
-          value={level}
-          onChange={(e) => setLevel(e.target.value)}
-        >
-          <option>Beginner</option>
-          <option>Intermediate</option>
-          <option>Advanced</option>
-        </select>
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full p-2 bg-slate-800 rounded"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full p-2 bg-slate-800 rounded"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
 
         <button
-          onClick={handleSignup}
-          className="w-full bg-blue-500 p-3 rounded"
+          type="submit"
+          className="w-full bg-blue-600 py-2 rounded hover:bg-blue-700"
         >
-          Start Training
+          Create Account
         </button>
 
-      </div>
+      </form>
 
     </div>
-  );
+  )
 }
-
-export default Signup;

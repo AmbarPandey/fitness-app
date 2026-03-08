@@ -1,0 +1,66 @@
+import { useContext } from "react"
+import { WorkoutContext } from "../context/WorkoutContext"
+import getTodayWorkout from "../utils/getTodayWorkout"
+
+function Dashboard() {
+
+  const { exerciseProgress } = useContext(WorkoutContext)
+
+  const TodayWorkout = getTodayWorkout()
+
+  const exercises = TodayWorkout?.exercises || []
+
+  const total = exercises.length
+
+  const completed = exercises.filter(ex => {
+
+    const data = exerciseProgress?.[ex.name]
+
+    return data?.completed
+
+  }).length
+
+  const percent = total
+    ? Math.round((completed / total) * 100)
+    : 0
+
+  return (
+
+    <div className="bg-[#0f1a2e] rounded-xl p-6 mb-10 w-full max-w-4xl">
+
+      <h2 className="text-2xl font-bold mb-6">
+        Performance Dashboard
+      </h2>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+
+        <div>
+          <p className="text-gray-400">Completed</p>
+          <p className="text-xl font-bold">{completed}</p>
+        </div>
+
+        <div>
+          <p className="text-gray-400">Total Exercises</p>
+          <p className="text-xl font-bold">{total}</p>
+        </div>
+
+        <div>
+          <p className="text-gray-400">Completion</p>
+          <p className="text-xl font-bold">{percent}%</p>
+        </div>
+
+        <div>
+          <p className="text-gray-400">Status</p>
+          <p className="text-xl font-bold text-green-400">
+            {percent >= 70 ? "Strong" : "Needs Work"}
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+  )
+}
+
+export default Dashboard
