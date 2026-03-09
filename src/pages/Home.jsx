@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { auth, db } from "../firebase"
-
+import ExerciseCard from "../components/ExerciseCard"
 import { doc, getDoc } from "firebase/firestore"
 import { onAuthStateChanged, signOut } from "firebase/auth"
 
@@ -149,13 +149,11 @@ export default function Home() {
       ) : (
 
         todayWorkout.exercises.map((exercise, index) => (
-          <div
-            key={index}
-            className="bg-slate-900 p-4 rounded-lg max-w-2xl mx-auto mb-3"
-          >
-            {exercise.name}
-          </div>
-        ))
+  <ExerciseCard
+    key={index}
+    exercise={exercise}
+  />
+))
 
       )}
 
